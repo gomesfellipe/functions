@@ -36,6 +36,7 @@ rquery.wordcloud <- function(x, type=c("text", "url", "file"),
   library("dplyr")
   library("RColorBrewer") 
   library("lexiconPT")
+  library("stringr")
   
   if(type[1]=="file") text <- readLines(x)
   else if(type[1]=="url") text <- html_to_text(x)
