@@ -1,2 +1,3 @@
-# my_functions
-My open function repository
+# Functions
+
+An open repository of functions
