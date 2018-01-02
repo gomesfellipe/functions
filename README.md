@@ -1,3 +1,3 @@
 # Functions
 
-An open repository of functions
+An repository with my open source functions
