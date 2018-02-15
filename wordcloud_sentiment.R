@@ -1,63 +1,94 @@
 # Como utilizar a funcao wordcloud_sentiment():
 
-#----------------.-------------------------------------------------------------------------------------------------.----------------------
-#      Argumento | Definicao                                                                                       | Default
-#----------------|------------------------------------------------------------------------------------------------------------------------
-#              x | Coluna com textos, ou url (ver type)                                                            |
-#----------------|------------------------------------------------------------------------------------------------------------------------
-#         type   | Tipo de arquivo para produzir a nuvem                                                           |
-#                |- url: endereço da qual deseja-se fazer a nuvem                                                  |
-#                |- text: Coluna com textos (cada linha representa um comentario)                                  |                                 |
-#----------------|------------------------------------------------------------------------------------------------------------------------
-#            lang| Lingua utilizada na nuvem (para remover as stopwords em portugues)                              |(Default = "portuguese")
-#----------------|------------------------------------------------------------------------------------------------------------------------
-#   excludeWords | Vetor de stopwords adicionais para serem removidas                                              |(Default=NULL) ou seja, sem palavras adicionais por padrao
-#----------------|------------------------------------------------------------------------------------------------------------------------
-#       min.freq | Palavras com frequência abaixo de min.freq não serão plotadas                                   |
-#----------------|------------------------------------------------------------------------------------------------------------------------
-#         tf.idf | Realiza a transformação tf.idf                                                                  | (Default=F)
-#----------------|------------------------------------------------------------------------------------------------------------------------
-#      max.words | Número máximo de palavras a serem plotadas. Menos termos freqüentes caíram                      |
-#----------------|------------------------------------------------------------------------------------------------------------------------
-#      rm.accent | Controla de os acentos serao removidos:                                                         |(Default = TRUE)
-#                |- TRUE para remover acentos,                                                                     |     
-#                |- FALSE caso nao queira remover acentos (obs: de preferencia para remover acentos)               |
-#----------------|------------------------------------------------------------------------------------------------------------------------
-#          print | Controla de a nuvem de palavras sera exibida:                                                   |(Default = TRUE)
-#                |- TRUE para plotar a nuvem de palavras,                                                          |
-#                |- FALSE para obter apenas a matriz de termos e a tabela de frequencias                           |
-#----------------|------------------------------------------------------------------------------------------------------------------------
-#         ngrams | Controla a frequencia sequencias de n palavras :                                                |(Default = 0)
-#                |- 2: sequencias de duas palavras                                                                 |
-#                |- 3: sequencias de tres palavras                                                                 |
-#                |- n: sequencias de n palavras                                                                    |
-#----------------|------------------------------------------------------------------------------------------------------------------------
-#   colorPalette | Este argumento define duas opcoes de como as palavras serao coloridas:                          |(Default = "Dark2") 
-#                |- "sentiment" : cada palavra é pintada de azul (positivo), vermelho (negativo) ou cinza (neutro) |
-#                |- "Dark2"     : exemplo de palleta de cores, para mais opcoes consultar rodar o codigo abaixo:   |
-#                |                display.brewer.all()                                                             |
-#----------------|------------------------------------------------------------------------------------------------------------------------
-# Funcao retorna | além da nuvem de palavras, retorna uma lista com dois objetos:                                  |    
-#                |- $tdm = matriz de termos e                                                                      |
-#                |- $freqTable = tabela de frequencia em ordem decrescente                                         |
-#----------------'-------------------------------------------------------------------------------------------------'----------------------
+#----------------.--------------------------------------------------------------------------------.-------------------------------------
+#      Argumento | Definicao                                                                      | Default
+#----------------'--------------------------------------------------------------------------------'-------------------------------------
+#              x | Coluna com textos, ou url (ver type)                                           |
+#----------------|----------------------------------------------------------------------------------------------------------------------
+#           type | Tipo de arquivo para produzir a nuvem                                          |
+#                |- url: Endereço da qual deseja-se fazer a nuvem                                 |
+#                |- text: Coluna com textos (cada linha representa um comentario)                 |
+#----------------'--------------------------------------------------------------------------------'-------------------------------------
+#           lang | Lingua utilizada na nuvem (para remover as stopwords em portugues)             | Default="portuguese"
+#----------------'--------------------------------------------------------------------------------'-------------------------------------
+#   excludeWords | Vetor de stopwords adicionais para serem removidas                             | Default=NULL
+#----------------'--------------------------------------------------------------------------------'-------------------------------------
+#           freq | Palavras com frequência abaixo de freq não serão plotadas                      | Default=15
+#----------------'--------------------------------------------------------------------------------'-------------------------------------
+#         tf_idf | Realiza a transformação tf.idf                                                 | Default=F
+#----------------'--------------------------------------------------------------------------------'-------------------------------------
+#            max | Número máximo de palavras a serem plotadas. Menos termos freqüentes caíram     | Default=200
+#----------------'--------------------------------------------------------------------------------'-------------------------------------
+#          print | Controla se a nuvem de palavras sera exibida:                                  | Default = TRUE
+#                |- TRUE para plotar a nuvem de palavras,                                         |
+#                |- FALSE para obter apenas a  tabela de frequencias                              |
+#----------------'--------------------------------------------------------------------------------'-------------------------------------
+#         ngrams | Controla a frequencia sequencias de n palavras :                               | Default = 1
+#                |- 2: sequencias de duas palavras                                                |
+#                |- 3: sequencias de tres palavras                                                |
+#                |- n: sequencias de n palavras                                                   |
+#----------------'--------------------------------------------------------------------------------'-------------------------------------
+#      sentiment | Controla se sera utilizada a analise de sentimentos                            | Default = FALSE 
+#                |- TRUE para , pintar de azul (positivo), vermelho (negativo) ou cinza (neutro)  |
+#                |- FALSE para obter nuvem com cor default                                        |                   
+#----------------'--------------------------------------------------------------------------------'-------------------------------------
+# Funcao retorna | Além da nuvem de palavras, retorna:                                            |
+#                |- $freq = tabela de frequencia em ordem decrescente                             |
+#----------------'--------------------------------------------------------------------------------'-------------------------------------
 
-#Funcao:
-wordcloud_sentiment <- function(x,  type=c("text", "url", "file"),
-                             lang="portuguese", excludeWords=NULL,  colorPalette="Dark2",
-                             min.freq=3, max.words=200,rm.accent=T,tf.idf=F,print=T,ngrams=0, 
-                             textStemming=FALSE)
-{ 
+
+# Funcao wordcloud_sentiment() --------------------------------------------
+
+wordcloud_sentiment = function(x,                          # Uma coluna de textos
+                               type=c("text", "url"),      # Tipo de entrada dos dados
+                               lang = "portuguese",        # Idioma dos dados
+                               excludeWords=NULL,          # Palavras que sera excluidas
+                               freq=15,                    # Frequencia minima da palavra para aparecer na nuvem
+                               tf_idf=F,                   # Transformacao tf-idf
+                               max= 200,                   # Numero maximo de palavras na nuvem
+                               print=T,                    # Define se a nuvem sera exibida
+                               ngrams=1,                   # Ordem da sequencia de palavras
+                               sentiment=F,                # Se a analise de sentimentos sera realizada
+                               horizontal=0.35,            # Porcentagem de palavras na horizontal (De zero a um)
+                               textStemming=F){            # Define se os sufixos serao removidos
   
-  library("tm")
-  library("SnowballC")
-  library("wordcloud")
-  library("dplyr")
-  library("RColorBrewer") 
-  library("lexiconPT")
-  library("stringr")
-  #++++++++++++++++++++++++++++++++++
-  # Download e analise de webpage
+  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  #+                      Importanto pacotes utilizados no aplicativo                             +
+  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  library(flexdashboard) #Pacote responsavel por gerar o aplicativo como dashboard
+  library(stringr)       #Pacote para manipulação de strings
+  library(dplyr)         #Pacote para manipulação de dados
+  library(tm)            #Pacote de para text mining
+  library(wordcloud)     #Pacote para nuvem de palavras
+  library(readxl)        #Pacote para leitura de dados excel
+  library(tidytext)      #Manipulação de textos
+  library(reshape2)      #Manipulação de dados
+  library(lexiconPT)     #Importar palavras de sentimentos
+  library(memoise)       #Cache resultados de uma função
+  library(SnowballC)     #Para steamming
+  library(purrr)         #Ferramentas de programação funcional
+  library(DT)            #Renderizar tabela da segunda pagina
+  library(ngram)         #Busca por sequencias de palavras  
+  #+--------------------------------------+---------------------------------------------+  
+  #Pacotes desativados:   (Nessa nova versao o RWeka nao sera mais utilizado)
+  # library(rJava)
+  # library(RWeka)
+  #-----------------------------------------------------------------------------------------------
+  
+  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  #+                  Importando fontes nativas do windows para as letras                         +
+  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  windowsFonts(
+    A=windowsFont("Arial Black"),
+    B=windowsFont("Bookman Old Style"),
+    C=windowsFont("Comic Sans MS"),
+    D=windowsFont("Symbol")
+  )
+  #-----------------------------------------------------------------------------------------------
+  
+  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  #+                               Download e analise de webpage                                  +
+  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   html_to_text<-function(url){
     library(RCurl)
     library(XML)
@@ -71,14 +102,67 @@ wordcloud_sentiment <- function(x,  type=c("text", "url", "file"),
     # Format text vector into one character string
     return(paste(text, collapse = " "))
   }
-  #++++++++++++++++++++++++++++++++++
+  #Fonte: http://www.sthda.com/english/wiki/print.php?id=159
+  #-----------------------------------------------------------------------------------------------
   
+  
+  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  #+                         Captação de erros de codificacao:                                    +
+  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  catch.error = function(x){
+    y = NA                                                     # Cria um vetor com valor faltante para teste
+    catch_error = tryCatch(tolower(x), error=function(e) e)    # Tente pegar esse erro (NA) que acabamos de criar
+    if (!inherits(catch_error, "error"))                       # Se não for um erro
+      y = tolower(x)                                           # verificar resultado se houver erro, caso contrário, a função funciona normalmente
+    return(y)
+  }
+  #Fonte: https://sites.google.com/site/miningtwitter/questions/talking-about/given-topic
+  #-----------------------------------------------------------------------------------------------
+  
+  
+  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  #+                            Limpeza de caracteres especiais                                   +
+  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  cleanTweets<- function(tweet){
+    
+    # Limpe o tweet para análise de sentimentos
+    
+    tweet = gsub("(f|ht)(tp)(s?)(://)(.*)[.|/](.*)", " ", tweet)  # Remove html links
+    tweet = gsub("(RT|via)((?:\\b\\W*@\\w+)+)", " ", tweet)       # Remove retweet 
+    tweet = gsub("#\\w+", " ", tweet)                             # Remove todos "#Hashtag"
+    tweet = gsub("@\\w+", " ", tweet)                             # Remove todos "@people"
+    tweet = gsub("[[:punct:]]", " ", tweet)                       # Remove todas as pontuacoes
+    tweet = gsub("[[:digit:]]", " ", tweet)                       # Remover numeros, precisamos apenas de texto para análise
+    
+    tweet = gsub("[ \t]{2,}", " ", tweet)                         # Remove espaços desnecessarios
+    tweet = gsub("^\\s+|\\s+$", "", tweet)                        # (espacos em branco, tabs etc)
+    
+    tweet = gsub('https://','',tweet)                             # Remove https://
+    tweet = gsub('http://','',tweet)                              # Remove http://
+    tweet = gsub('[^[:graph:]]', ' ',tweet)                       # Remove strings gráficos como emoticons
+    tweet = gsub('[[:punct:]]', '', tweet)                        # Remove pontuacao 
+    tweet = gsub('[[:cntrl:]]', '', tweet)                        # Remove strings de controle
+    tweet = gsub('\\d+', '', tweet)                               # Remove numeros
+    tweet=str_replace_all(tweet,"[^[:graph:]]", " ")              # Remove strings gráficos como emoticons
+    #tweet=SnowballC::wordStem(tweet,language = lang)     # Aplica steamming (desativado) 
+    
+    #Converte tudo para minusculo 
+    tweet = catch.error(tweet)                                    # Aplica a funcao catch.error 
+    
+    return(tweet)
+  }
+  #Referencia: https://sites.google.com/site/miningtwitter/questions/talking-about/wordclouds/comparison-cloud
+  #-----------------------------------------------------------------------------------------------
+  
+  #Leitura da coluna de texto informada:
   if(type[1]=="url"){ text <- html_to_text(x)}
   else{ if(type[1]=="text") text <- x}
+  text=as.data.frame(text)
   
   
-  
-  # Remover acentos
+  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  #                             Funcao para remover acentuacao                                    +
+  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   rm_accent <- function(str,pattern="all") {
     # Rotinas e funções úteis V 1.0
     # rm.accent - REMOVE ACENTOS DE PALAVRAS
@@ -125,227 +209,195 @@ wordcloud_sentiment <- function(x,  type=c("text", "url", "file"),
     
     return(str)
   }
-  #++++++++++++++++++++++++++++++++++
-  # Captação de erros de codificacao:
-  catch.error = function(x){
-    # let us create a missing value for test purpose
-    y = NA
-    # Try to catch that error (NA) we just created
-    catch_error = tryCatch(tolower(x), error=function(e) e)
-    # if not an error
-    if (!inherits(catch_error, "error"))
-      y = tolower(x)
-    # check result if error exists, otherwise the function works fine.
-    return(y)
-  }
-  #++++++++++++++++++++++++++++++++++
-  #++++++++++++++++++++++++++++++++++
-  # Limpeza de caracteres especiais
-  cleanTweets<- function(tweet){
-    
-    # Clean the tweet for sentiment analysis
-    
-    # remove html links
-    
-    tweet = gsub("(f|ht)(tp)(s?)(://)(.*)[.|/](.*)", " ", tweet)
-    
-    # Remove retweet entities
-    
-    tweet = gsub("(RT|via)((?:\\b\\W*@\\w+)+)", " ", tweet)
-    
-    # Remove all "#Hashtag"
-    
-    tweet = gsub("#\\w+", " ", tweet)
-    
-    # Remove all "@people"
-    
-    tweet = gsub("@\\w+", " ", tweet)
-    
-    # Remove all the punctuation
-    
-    tweet = gsub("[[:punct:]]", " ", tweet)
-    
-    # Remove numbers, we need only text for analytics
-    
-    tweet = gsub("[[:digit:]]", " ", tweet)
-    
-    # Remove unnecessary spaces (white spaces, tabs etc)
-    tweet = gsub("[ \t]{2,}", " ", tweet)
-    tweet = gsub("^\\s+|\\s+$", "", tweet)
-    
-    tweet = gsub('https://','',tweet) # removes https://
-    tweet = gsub('http://','',tweet) # removes http://
-    tweet=gsub('[^[:graph:]]', ' ',tweet) ## removes graphic characters 
-    #like emoticons 
-    tweet = gsub('[[:punct:]]', '', tweet) # removes punctuation 
-    tweet = gsub('[[:cntrl:]]', '', tweet) # removes control characters
-    tweet = gsub('\\d+', '', tweet) # removes numbers
-    tweet=str_replace_all(tweet,"[^[:graph:]]", " ")
-    #tweet=SnowballC::wordStem(tweet,language = "portuguese")
-    
-    
-    #Convert all text to lowercase
-    tweet = catch.error(tweet)
-    
-    return(tweet)
-  }
-  #++++++++++++++++++++++++++++++++++
-  #++++++++++++++++++++++++++++++++++
-  # Remover NAs
-  cleanTweetsAndRemoveNAs<- function(Tweets) {
-    
-    TweetsCleaned = sapply(Tweets, cleanTweets)
-    
-    # Remove the "NA" tweets from this tweet list
-    TweetsCleaned = TweetsCleaned[!is.na(TweetsCleaned)]
-    
-    names(TweetsCleaned) = NULL
-    # Remove the repetitive tweets from this tweet list
-    
-    TweetsCleaned = unique(TweetsCleaned)
-    
-    TweetsCleaned
-  }
-  #++++++++++++++++++++++++++++++++++
-  #Temporario:
-  text <- text
-    
-  #limpeza
-  text=cleanTweets(text)
+  #Fonte: https://pt.stackoverflow.com/questions/46473/remover-acentos
+  #-----------------------------------------------------------------------------------------------
+
+  text=apply(text,1,rm_accent)                                     #Aplica no objeto "text, por linha, a funcao definida acima
   
-  #Remover acentos
-  if(rm.accent==T){
-    text=rm_accent(text)
-  }
+  #Criando corpus:
+  text=data.frame(doc_id=1:length(text),                           #Criando o data.frame para criar o corpus
+                  text=text)
+  myCorpus = Corpus(DataframeSource(as.data.frame(text)))          #Criando o corpus a partir de um data.frame
   
-  # Carrega o arquivo de texto para um corpus:
-  docs <- Corpus(DataframeSource(as.data.frame(text)))
+  # if(textStemming) myCorpus <- Corpus(VectorSource(text))        #Para stemming (Com atualizacao do pacote tm nao eh mais necessario) 
   
-  # Convert the text to lower case
-  docs <- tm_map(docs, content_transformer(tolower))
   
-  # Remove numbers
-  docs <- tm_map(docs, removeNumbers)
+  #Tratamento do corpus:
+  myCorpus=myCorpus%>%
+    tm_map(content_transformer(tolower))%>%                        # Converte para minusculo
+    tm_map(removeNumbers)%>%                                       # Remove numeros do corpus
+    tm_map(removeWords, stopwords(lang))%>%                        # Remove stopwords do dicionario portgues
+    tm_map(removePunctuation)%>%                                   # Remove pontuacao
+    tm_map(stripWhitespace)%>%                                     # Remove excessos de espacos em branco
+    tm_map(removeWords, excludeWords)                              # Exclue palavras adicionais  
   
-  # Remove stopwords for the language 
-  docs <- tm_map(docs, removeWords, stopwords(lang))
+  #Realiza o steamming se textStemming==V
+  if(textStemming) myCorpus <- tm_map(myCorpus, stemDocument,language=lang)
   
-  # Remove punctuations
-  docs <- tm_map(docs, removePunctuation)
   
-  # Eliminate extra white spaces
-  docs <- tm_map(docs, stripWhitespace)
+  #Agora sera feita a procura por sequencias de palavras se ngrams for diferente de 1:
   
-  # Remove your own stopwords
-  if(!is.null(excludeWords)) 
-    docs <- tm_map(docs, removeWords, excludeWords) 
+  #Abordagem com RWeka (Off)--------------------------------------------------------------------
+  # Abordagem antiga utilizava o pacote RWeka, esse pacote nao sera mais utilizado
+  # Tokenizer <- function(x) NGramTokenizer(x, Weka_control(min = ngrams, max = ngrams))
+  # myDTM = TermDocumentMatrix(myCorpus,control = list(tokenize = Tokenizer))
+  #---------------------------------------------------------------------------------------------
   
-  # Text stemming
-  if(textStemming) docs <- tm_map(docs, stemDocument,language=lang)
-  
-  # Create term-document matrix
-  tdm <- TermDocumentMatrix(docs)
-  
-  #Se tf.idf for verdadeiro:
-  if(tf.idf==T){
-    tdm=weightTfIdf(tdm,normalize=T)
-  }
-  
-  #Se Ngram=True:
-  if(ngrams!=0){
-    Tokenizer <- function(x) NGramTokenizer(x, Weka_control(min = ngrams, max = ngrams))
-    tdm = TermDocumentMatrix(docs,control = list(tokenize = Tokenizer))
-  }
-  
-  #Criando matriz para retornar
-  m <- as.matrix(tdm)
-  v <- sort(rowSums(m),decreasing=TRUE)
-  d <- data.frame(words = names(v),freq=v)
-  
-  if(print==T){
-    # check the color palette name 
-    if(colorPalette!="sentiment"){
-      if(!colorPalette %in% rownames(brewer.pal.info)){ 
-        colors = colorPalette
-        # Plot the word cloud
-        set.seed(1234)
-        wordcloud(d$words,d$freq, min.freq=min.freq, max.words=max.words,
-                  random.order=FALSE, rot.per=0.35, 
-                  use.r.layout=FALSE, colors=colors)
-      }else{
-        colors = brewer.pal(8, colorPalette)
-        # Plot the word cloud
-        set.seed(1234)
-        wordcloud(d$words,d$freq, min.freq=min.freq, max.words=max.words,
-                  random.order=FALSE, rot.per=0.35, 
-                  use.r.layout=FALSE, colors=colors)
-      }
-      return(list(tdm=tdm, freqTable = d)) 
+  # Se ngrams for difernte de 1:
+  if(ngrams!=1){
+    temp=ngram::ngram(ngram::concatenate(myCorpus),ngrams)            # Objeto temporario recebe objeto que guarda sequencias
+    temp=get.phrasetable(temp)                                        # Obtendo tabela de sequencias do objeto acima
+    
+    temp$ngrams=temp$ngrams%>%                                        # Limpeza das sequencias obtidas:
+      str_replace_all(pattern = "^([A-Za-z] [A-Za-z])+","")%>%        # Remover sequencias de apenas 1 letras 
+      str_replace_all(pattern = "[:punct:]","")%>%                    # Remover caracteres especiais
+      str_replace_all(pattern = "\n","")%>%                           # Remover o marcador de "nova linha"
+      str_trim()                                                      # Remover espaços em branco sobrando
+    
+    #Apos a limpeza..
+    
+    temp=temp[temp$ngrams!="",]                                       # Selecionando apenas as linhas que contenham informacao
+    
+    temp=temp%>%                                                      # Novamente manipulando o objeto que contem a tabela de sequencias
+      group_by(ngrams) %>%                                            # Agrupando por "ngrams" (sequencias obtidas)
+      summarise(freq=sum(freq))%>%                                    # Resumir as linhas repetidas pela soma das frequencias
+      arrange(desc(freq))%>%                                          # Organizando da maior para a menos frequencia
+      as.matrix()                                                     # Alterando o tipo de objeto para matrix
+    
+    rownames(temp)=str_c(temp[,1])                                    # O nome das linhas passa a ser a sequencia correspondente
+    v = sort(temp[,2],decreasing = T)                                 # Retorna um objeto com as frequencias em ordem decrescente e linhas nomeadas
+    d <- data.frame(words = names(v),freq=v) 
+    
+# Caso contrario, se ngrams for igual a 1 (sem sequencias)      
+  }else{
+    
+    myDTM = TermDocumentMatrix(myCorpus,                              # Obtendo matriz de termos:
+                               control = list(minWordLength = 1))     # Com no minimo 1 ocorrencia
+    
+#Se se ngrams for igual a 1 (sem sequencias) e tf.idf for verdadeiro:
+    if(tf_idf==T){
+      myDTM=weightTfIdf(myDTM,normalize=T)                            # Realiza transformacao tf-idf
     }
     
-    if(colorPalette=="sentiment"){
-      sentiLex_lem_PT02 <- lexiconPT::sentiLex_lem_PT02
+    m = as.matrix(myDTM)                                              # Transforma o objeto em matrix
+    v = sort(rowSums(m),decreasing=TRUE)                              # Retorna um objeto com as frequencias em ordem decrescente e linhas nomeadas
+    d <- data.frame(words = names(v),freq=v) 
+    
+  }
+  if(print==T){                                                       # Se a imagem vai ser exibida
+    
+    # Analise de sentimentos
+    if(sentiment){                                                    # Se a opcao de sentimentos estiver selecionada
       
-      #Selecionando as palavras (seus radicais) e sua polaridade
-      dicionary=data.frame(cbind(sentiLex_lem_PT02$term,sentiLex_lem_PT02$polarity))
-      matriz=d
-      #Arrumando nome das bases de dados2: (Colocar nomes iguais para words)
-      names(dicionary)=c("words", "sentiment")
-      names(matriz)=c("words", "freq")
+      sentiLex_lem_PT02 <- lexiconPT::sentiLex_lem_PT02               # Obtem o dicionario lexico em Portugues
       
-      #Transformando palavras em character:
-      dicionary$words=as.character(dicionary$words)
-      matriz$words=as.character(matriz$words)
+      dicionary=data.frame(cbind(sentiLex_lem_PT02$term,              # Seleciona as palavras e 
+                                 sentiLex_lem_PT02$polarity))         # a polaridade de cada uma
+      
+      matriz=d                                                        # Cria uma base temporaria para o join
+      
+      names(dicionary)=c("words", "sentiment")                        # Alterando os nomes das colunas do dicionario e da base obtida
+      names(matriz)=c("words", "freq")                                # (O nome deve ser o mesmo para o join)
+      
+      dicionary$words=as.character(dicionary$words)                   # Transformando as duas
+      matriz$words=as.character(matriz$words)                         # bases obtidas em strings
       
       
-      dicionary=dicionary[ dicionary$sentiment==1 | dicionary$sentiment==0 | dicionary$sentiment==-1, ]
-      table(dicionary$sentiment)
-      dicionary$sentiment=as.factor(dicionary$sentiment)
-      #Alterando o nome dos sentimentos:
+      if(textStemming){                                               # Se textStemming estiver ligada
+        dicionary$words <- wordStem(dicionary$words,                  # Steamming o dicionario lexico tambem
+                                    language = lang)                  # De acordo com a lingua portuguesa
+      }
+      
+      dicionary=dicionary[ dicionary$sentiment==1 | dicionary$sentiment==0 | dicionary$sentiment==-1, ] # Obtendo so os polos -1, 1 e 0
+      dicionary$sentiment=as.factor(dicionary$sentiment)              # Transformando em fator
+      
+      #Alterando o nome dos fatores para o respectivo sentimento:
       levels(dicionary$sentiment)[levels(dicionary$sentiment)==-1]=c("Negativo")
       levels(dicionary$sentiment)[levels(dicionary$sentiment)==0]=c("Neutro")
       levels(dicionary$sentiment)[levels(dicionary$sentiment)==1]=c("Positivo")
       
-      #Join das palavras do documento com o dicionario ntivo do R
-      sentimentos=data.frame(matriz) %>%
-        left_join(data.frame(dicionary),by="words") %>%
-        select(words,sentiment,freq)%>%
-        distinct(words,.keep_all = T)
+      #Join das strings do documento com as strings nativas do pacote LexiconPT
+      sentimentos=data.frame(matriz) %>%                              # O objeto "sentimentos" recebe
+        left_join(data.frame(dicionary),by="words") %>%               # left_join mantem todas as linhas da base matriz (esquerda) e busca por pares com o dicionario 
+        select(words,sentiment,freq)%>%                               # Seleciona as colunas das strings, o sentimento e sua frequencia
+        distinct(words,.keep_all = T)                                 # Seleciona apenas linhas distintas
       
-      rownames(d)=d$words
-      #Neutro para palavras fora do dicionario
-      sentimentos$sentiment[is.na(sentimentos$sentiment)]="Neutro"
+      rownames(d)=d$words                                             # Nomeia as linhas do data.frame d   
+      
+      
+      
+      sentimentos$sentiment[is.na(sentimentos$sentiment)]="Neutro"    # Neutro para palavras fora do dicionario
       
       #Criando coluna de cores para cada sentimento
-      sentimentos$col=c(ifelse(sentimentos$sentiment=="Neutro","gray80",ifelse(sentimentos$sentiment=="Positivo","blue","red")))
-      ##########################################
-      # Plot the word cloud
-      set.seed(1234)
-      wordcloud(sentimentos$words,freq = sentimentos$freq, min.freq=min.freq, max.words=max.words,
-                random.order=FALSE, rot.per=0.35, 
-                use.r.layout=FALSE, colors = sentimentos$col,ordered.colors = T)
-      return(list(tdm=tdm, freqTable = sentimentos))
+      sentimentos$col=c(                                              # Criando uma nova coluna para objeto "sentimentos"
+        ifelse(sentimentos$sentiment=="Neutro","#666666",             # Se for "Neutro" sera cinza, se nao:
+               ifelse(sentimentos$sentiment=="Positivo","blue","red"))) #Se for "Positivo" recebe azul, se nao é vermelho
+      
+      #dev.new(width=10, height=10)
+      par(bg="#f2f2f2")                                               # Define a cor do fundo da figura
+      set.seed(1234)                                                  # Semente para gerar a mesma nuvem
+      wordcloud(names(v), freq=as.numeric(v),                         # Funcao repetitiva wordcloud, objeto v foi retornado pela funcao global getTermMatrix()
+                scale=c(4,0.5),                                       # Um vetor de comprimento 2 que indica o range do tamanho das palavras     
+                min.freq = freq,                                      # Input informado pelo usuario
+                max.words=max,                                        # Input informado pelo usuario
+                colors=sentimentos$col,                               # Input informado pelo usuario
+                random.order=FALSE,                                   # Plot das palavras em ordem aleatória. Se falso, eles serão plotados em frequência decrescente
+                rot.per=(1-horizontal),                               # Proporção de palavras com rotação de 90 graus
+                use.r.layout=FALSE,                                   # Se falso, o código c ++ é usado para detecção de colisão, caso contrário, R é usado
+                family = "C",                                         # Seleciona a fonte informada em windowsFonts no inicio do documento
+                font = 2)                                             # 1:default, 2:negrito, 3:italico, 4:negrito+italico
+      
+      return(freq = d)                                                # Retorna os termos detectados ordenados de acordo com a sua frequencia
+      
+      #Se a analise de sentimentos nao for selecionada  
+    }else{
+      #dev.new(width=10, height=10)
+      par(bg="#f2f2f2")                                               # Define a cor do fundo da figura
+      set.seed(1234)                                                  # Semente para gerar a mesma nuvem
+      wordcloud(names(v), freq=as.numeric(v),                         # As entradas serao as mesmas mensionadas acima, com excessao da cor
+                scale=c(4,0.5),                                       # Um vetor de comprimento 2 que indica o range do tamanho das palavras   
+                min.freq = freq,                                      # Input informado pelo usuario
+                max.words=max,                                        # Input informado pelo usuario
+                colors=c("#dd003f","#002637","#0bdc99","#00bac5","#ff8947","#c20037","#00a2ab")%>%  #Cores desejadas
+                  rev(),                                              # Altera a ordem que as cores participarao da figura
+                random.order=FALSE,                                   # Plot das palavras em ordem aleatória. Se falso, eles serão plotados em frequência decrescente
+                rot.per=(1-horizontal),                               # Proporção de palavras com rotação de 90 graus
+                use.r.layout=FALSE,                                   # Se falso, o código c ++ é usado para detecção de colisão, caso contrário, R é usado
+                family = "C",                                         # Seleciona a fonte informada em windowsFonts no inicio do documento 
+                font = 2)                                             # 1:default, 2:negrito, 3:italico, 4:negrito+italico
+      
+      return(freq = d)                                                # Retorna os termos detectados ordenados de acordo com a sua frequencia
+      
     }
+    
   }else{
-    return(list(tdm=tdm, freqTable = d))}
+    return(freq = d)}                                                 # Retorna os termos detectados ordenados de acordo com a sua frequencia
   
 }
 
 
-# #Exemplo: ---------------------------------------------------------------
+
+
+# Testando a funcao: -----------------------------------------------------
+
+library(readr)                # Carregando pacote para leitura do arquivo
+base <- read_csv("base.csv")  # Leitura do arquivo exemplo disponível em: https://github.com/gomesfellipe/appwordcloud/
+base=base[,2]                 # Selecionando apenas a coluna do texto
+
+# Obtendo nuvem e salvando tabela num objeto com nome teste:
+teste=wordcloud_sentiment(base,                                       
+                          type = "text",
+                          sentiment = F,
+                          excludeWords = c("nao"),
+                          ngrams = 3,
+                          tf_idf = T,
+                          max = 100,
+                          freq = 10,
+                          horizontal = 1,
+                          textStemming = F,
+                          print=T)
+# Conferindo o conteudo do objeto criado:
+teste
 
 #Com url:
 wordcloud_sentiment(x="https://support.rstudio.com/hc/en-us/articles/200714013-Slide-Transitions-and-Navigation",type="url")
-
-#Com base exemplo:
-x=base$V2                                            #Disponível em: https://github.com/gomesfellipe/appwordcloud/
-wordcloud_sentiment(x,type="text",color="sentiment")
-
-# #Referencia: ---------------------------------------------------------------
-
-#++++++++++++++++++++++++++++++++++
-# rquery.wordcloud() versao inicial retirada:
-# - http://www.sthda.com
-# referencia:
-# - https://sites.google.com/site/miningtwitter/questions/sentiment/analysis
-#+++++++++++++++++++++++++++++++++++
