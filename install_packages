@@ -1,0 +1,10 @@
+packages = c('<package1>', '<package2>')
+
+for (package in packages) {
+    if (!require(package, character.only=T, quietly=T)) {
+        install.packages(package)
+        library(package, character.only=T)
+    }
+}
+
+# Ref: https://stackoverflow.com/questions/5595512/what-is-the-difference-between-require-and-library?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
