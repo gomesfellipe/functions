@@ -1,0 +1,8 @@
+
+# Fonte: http://www.kimberlycoffey.com/blog/2016/7/16/compare-multiple-caret-run-machine-learning-models
+
+too_any_levels <- function(x) {
+ is.factor(x) == TRUE & length(levels(x)) > 32
+}
+delete <- lapply(data, too.many.levels)
+remove(delete, too.many.levels)
