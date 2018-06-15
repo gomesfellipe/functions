@@ -1,0 +1,17 @@
+# Retorna uma tabela com os cortes, acurácia, especificidade e sensibilidade, respectivamente.
+
+glm_tune <- function(glm_model, dataset) {
+  results <- data.frame()   
+  for (q in seq(0.2, 0.8, by = 0.02)) {
+    fitted_values <- glm_model$fitted.values     
+    prediction <- ifelse(fitted_values >= q, "1", "0")     
+    cm <- confusionMatrix(factor(prediction), factor(dataset$Resultado))     
+    accuracy <- cm$overall["Accuracy"]     
+    specificity <- cm$byClass["Specificity"]     
+    sensi <- cm$byClass["Sensitivity"]     
+    results <- rbind(results, data.frame(cutoff=q, accuracy=accuracy, specificity = specificity,Sensit=sensi))   }   
+  rownames(results)   
+  results 
+  }
+  
+ # Náo lembro a referência, se alguem souber me avisa
