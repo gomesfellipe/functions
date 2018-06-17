@@ -12,7 +12,8 @@ plot_pred_type_distribution <- function(df, threshold) {
     geom_jitter(aes(color=fit_type), alpha=0.6) +
     geom_hline(yintercept=threshold, color="red", alpha=0.6) +
     scale_color_discrete(name = "type") +
-    labs(title=sprintf("Threshold at %.2f", threshold))
+    labs(title=sprintf("Threshold at %.2f", threshold))+
+    theme_bw()
 }
 
 # Ref: https://github.com/joyofdata/joyofdata-articles/blob/master/roc-auc/log_reg.R
