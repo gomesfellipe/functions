@@ -378,26 +378,26 @@ wordcloud_sentiment = function(x,                          # Uma coluna de texto
 
 
 
-# Testando a funcao: -----------------------------------------------------
-
-library(readr)                # Carregando pacote para leitura do arquivo
-base <- read_csv("base.csv")  # Leitura do arquivo exemplo disponível em: https://github.com/gomesfellipe/appwordcloud/
-base=base[,2]                 # Selecionando apenas a coluna do texto
-
-# Obtendo nuvem e salvando tabela num objeto com nome teste:
-teste=wordcloud_sentiment(base,                                       
-                          type = "text",
-                          sentiment = F,
-                          excludeWords = c("nao"),
-                          ngrams = 3,
-                          tf_idf = T,
-                          max = 100,
-                          freq = 10,
-                          horizontal = 1,
-                          textStemming = F,
-                          print=T)
-# Conferindo o conteudo do objeto criado:
-teste
-
-#Com url:
-wordcloud_sentiment(x="https://support.rstudio.com/hc/en-us/articles/200714013-Slide-Transitions-and-Navigation",type="url")
+# # Testando a funcao: -----------------------------------------------------
+# 
+# library(readr)                # Carregando pacote para leitura do arquivo
+# base <- read_csv("base.csv")  # Leitura do arquivo exemplo disponível em: https://github.com/gomesfellipe/appwordcloud/
+# base=base[,2]                 # Selecionando apenas a coluna do texto
+# 
+# # Obtendo nuvem e salvando tabela num objeto com nome teste:
+# teste=wordcloud_sentiment(base,                                       
+#                           type = "text",
+#                           sentiment = F,
+#                           excludeWords = c("nao"),
+#                           ngrams = 3,
+#                           tf_idf = T,
+#                           max = 100,
+#                           freq = 10,
+#                           horizontal = 1,
+#                           textStemming = F,
+#                           print=T)
+# # Conferindo o conteudo do objeto criado:
+# teste
+# 
+# #Com url:
+# wordcloud_sentiment(x="https://support.rstudio.com/hc/en-us/articles/200714013-Slide-Transitions-and-Navigation",type="url")
