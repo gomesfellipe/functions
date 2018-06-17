@@ -56,19 +56,19 @@ wordcloud_sentiment = function(x,                          # Uma coluna de texto
   #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   #+                      Importanto pacotes utilizados no aplicativo                             +
   #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  library(stringr)       #Pacote para manipulação de strings
-  library(dplyr)         #Pacote para manipulação de dados
-  library(tm)            #Pacote de para text mining
-  library(wordcloud)     #Pacote para nuvem de palavras
-  library(readxl)        #Pacote para leitura de dados excel
-  library(tidytext)      #Manipulação de textos
-  library(reshape2)      #Manipulação de dados
-  library(lexiconPT)     #Importar palavras de sentimentos
-  library(SnowballC)     #Para steamming
-  library(purrr)         #Ferramentas de programação funcional
-  library(DT)            #Renderizar tabela da segunda pagina
-  library(ngram)         #Busca por sequencias de palavras 
-  library(abjutils)      #Remover acentos
+  suppressMessages(library(stringr))       #Pacote para manipulação de strings
+  suppressMessages(library(dplyr))         #Pacote para manipulação de dados
+  suppressMessages(library(tm))            #Pacote de para text mining
+  suppressMessages(library(wordcloud))     #Pacote para nuvem de palavras
+  suppressMessages(library(readxl))        #Pacote para leitura de dados excel
+  suppressMessages(library(tidytext))      #Manipulação de textos
+  suppressMessages(library(reshape2))      #Manipulação de dados
+  suppressMessages(library(lexiconPT))     #Importar palavras de sentimentos
+  suppressMessages(library(SnowballC))     #Para steamming
+  suppressMessages(library(purrr))         #Ferramentas de programação funcional
+  suppressMessages(library(DT))            #Renderizar tabela da segunda pagina
+  suppressMessages(library(ngram))         #Busca por sequencias de palavras 
+  suppressMessages(library(abjutils))      #Remover acentos
   #+--------------------------------------+---------------------------------------------+  
   #Pacotes desativados:   (Nessa nova versao o RWeka nao sera mais utilizado)
   # library(rJava)
