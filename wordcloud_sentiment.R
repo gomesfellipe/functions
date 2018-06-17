@@ -1,3 +1,4 @@
+
 # Como utilizar a funcao wordcloud_sentiment():
 
 #----------------.--------------------------------------------------------------------------------.-------------------------------------
@@ -55,7 +56,6 @@ wordcloud_sentiment = function(x,                          # Uma coluna de texto
   #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   #+                      Importanto pacotes utilizados no aplicativo                             +
   #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  library(flexdashboard) #Pacote responsavel por gerar o aplicativo como dashboard
   library(stringr)       #Pacote para manipulação de strings
   library(dplyr)         #Pacote para manipulação de dados
   library(tm)            #Pacote de para text mining
@@ -64,11 +64,11 @@ wordcloud_sentiment = function(x,                          # Uma coluna de texto
   library(tidytext)      #Manipulação de textos
   library(reshape2)      #Manipulação de dados
   library(lexiconPT)     #Importar palavras de sentimentos
-  library(memoise)       #Cache resultados de uma função
   library(SnowballC)     #Para steamming
   library(purrr)         #Ferramentas de programação funcional
   library(DT)            #Renderizar tabela da segunda pagina
-  library(ngram)         #Busca por sequencias de palavras  
+  library(ngram)         #Busca por sequencias de palavras 
+  library(abjutils)      #Remover acentos
   #+--------------------------------------+---------------------------------------------+  
   #Pacotes desativados:   (Nessa nova versao o RWeka nao sera mais utilizado)
   # library(rJava)
@@ -86,137 +86,20 @@ wordcloud_sentiment = function(x,                          # Uma coluna de texto
   )
   #-----------------------------------------------------------------------------------------------
   
-  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  #+                               Download e analise de webpage                                  +
-  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  html_to_text<-function(url){
-    library(RCurl)
-    library(XML)
-    # download html
-    html.doc <- getURL(url)  
-    #convert to plain text
-    doc = htmlParse(html.doc, asText=TRUE)
-    # "//text()" returns all text outside of HTML tags.
-    # We also don’t want text such as style and script codes
-    text <- xpathSApply(doc, "//text()[not(ancestor::script)][not(ancestor::style)][not(ancestor::noscript)][not(ancestor::form)]", xmlValue)
-    # Format text vector into one character string
-    return(paste(text, collapse = " "))
-  }
-  #Fonte: http://www.sthda.com/english/wiki/print.php?id=159
-  #-----------------------------------------------------------------------------------------------
-  
-  
-  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  #+                         Captação de erros de codificacao:                                    +
-  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  catch.error = function(x){
-    y = NA                                                     # Cria um vetor com valor faltante para teste
-    catch_error = tryCatch(tolower(x), error=function(e) e)    # Tente pegar esse erro (NA) que acabamos de criar
-    if (!inherits(catch_error, "error"))                       # Se não for um erro
-      y = tolower(x)                                           # verificar resultado se houver erro, caso contrário, a função funciona normalmente
-    return(y)
-  }
-  #Fonte: https://sites.google.com/site/miningtwitter/questions/talking-about/given-topic
-  #-----------------------------------------------------------------------------------------------
-  
-  
-  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  #+                            Limpeza de caracteres especiais                                   +
-  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  cleanTweets<- function(tweet){
-    
-    # Limpe o tweet para análise de sentimentos
-    
-    tweet = gsub("(f|ht)(tp)(s?)(://)(.*)[.|/](.*)", " ", tweet)  # Remove html links
-    tweet = gsub("(RT|via)((?:\\b\\W*@\\w+)+)", " ", tweet)       # Remove retweet 
-    tweet = gsub("#\\w+", " ", tweet)                             # Remove todos "#Hashtag"
-    tweet = gsub("@\\w+", " ", tweet)                             # Remove todos "@people"
-    tweet = gsub("[[:punct:]]", " ", tweet)                       # Remove todas as pontuacoes
-    tweet = gsub("[[:digit:]]", " ", tweet)                       # Remover numeros, precisamos apenas de texto para análise
-    
-    tweet = gsub("[ \t]{2,}", " ", tweet)                         # Remove espaços desnecessarios
-    tweet = gsub("^\\s+|\\s+$", "", tweet)                        # (espacos em branco, tabs etc)
-    
-    tweet = gsub('https://','',tweet)                             # Remove https://
-    tweet = gsub('http://','',tweet)                              # Remove http://
-    tweet = gsub('[^[:graph:]]', ' ',tweet)                       # Remove strings gráficos como emoticons
-    tweet = gsub('[[:punct:]]', '', tweet)                        # Remove pontuacao 
-    tweet = gsub('[[:cntrl:]]', '', tweet)                        # Remove strings de controle
-    tweet = gsub('\\d+', '', tweet)                               # Remove numeros
-    tweet=str_replace_all(tweet,"[^[:graph:]]", " ")              # Remove strings gráficos como emoticons
-    #tweet=SnowballC::wordStem(tweet,language = lang)     # Aplica steamming (desativado) 
-    
-    #Converte tudo para minusculo 
-    tweet = catch.error(tweet)                                    # Aplica a funcao catch.error 
-    
-    return(tweet)
-  }
-  #Referencia: https://sites.google.com/site/miningtwitter/questions/talking-about/wordclouds/comparison-cloud
-  #-----------------------------------------------------------------------------------------------
   
   #Leitura da coluna de texto informada:
   if(type[1]=="url"){ text <- html_to_text(x)}
   else{ if(type[1]=="text") text <- x}
   text=as.data.frame(text)
   
+  text <- text %>% 
+    as_tibble() %>% 
+    transmute(value = cleanTweets(text) %>% enc2native() %>% abjutils::rm_accent()) 
   
-  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  #                             Funcao para remover acentuacao                                    +
-  #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  rm_accent <- function(str,pattern="all") {
-    # Rotinas e funções úteis V 1.0
-    # rm.accent - REMOVE ACENTOS DE PALAVRAS
-    # Função que tira todos os acentos e pontuações de um vetor de strings.
-    # Parâmetros:
-    # str - vetor de strings que terão seus acentos retirados.
-    # patterns - vetor de strings com um ou mais elementos indicando quais acentos deverão ser retirados.
-    #            Para indicar quais acentos deverão ser retirados, um vetor com os símbolos deverão ser passados.
-    #            Exemplo: pattern = c("´", "^") retirará os acentos agudos e circunflexos apenas.
-    #            Outras palavras aceitas: "all" (retira todos os acentos, que são "´", "`", "^", "~", "¨", "ç")
-    if(!is.character(str))
-      str <- as.character(str)
-    
-    pattern <- unique(pattern)
-    
-    if(any(pattern=="Ç"))
-      pattern[pattern=="Ç"] <- "ç"
-    
-    symbols <- c(
-      acute = "áéíóúÁÉÍÓÚýÝ",
-      grave = "àèìòùÀÈÌÒÙ",
-      circunflex = "âêîôûÂÊÎÔÛ",
-      tilde = "ãõÃÕñÑ",
-      umlaut = "äëïöüÄËÏÖÜÿ",
-      cedil = "çÇ"
-    )
-    
-    nudeSymbols <- c(
-      acute = "aeiouAEIOUyY",
-      grave = "aeiouAEIOU",
-      circunflex = "aeiouAEIOU",
-      tilde = "aoAOnN",
-      umlaut = "aeiouAEIOUy",
-      cedil = "cC"
-    )
-    
-    accentTypes <- c("´","`","^","~","¨","ç")
-    
-    if(any(c("all","al","a","todos","t","to","tod","todo")%in%pattern)) # opcao retirar todos
-      return(chartr(paste(symbols, collapse=""), paste(nudeSymbols, collapse=""), str))
-    
-    for(i in which(accentTypes%in%pattern))
-      str <- chartr(symbols[i],nudeSymbols[i], str)
-    
-    return(str)
-  }
-  #Fonte: https://pt.stackoverflow.com/questions/46473/remover-acentos
-  #-----------------------------------------------------------------------------------------------
-
-  text=apply(text,1,rm_accent)                                     #Aplica no objeto "text, por linha, a funcao definida acima
   
   #Criando corpus:
-  text=data.frame(doc_id=1:length(text),                           #Criando o data.frame para criar o corpus
-                  text=text)
+  text=data.frame(doc_id=1:length(text$value),                           #Criando o data.frame para criar o corpus
+                  text=text$value)
   myCorpus = Corpus(DataframeSource(as.data.frame(text)))          #Criando o corpus a partir de um data.frame
   
   # if(textStemming) myCorpus <- Corpus(VectorSource(text))        #Para stemming (Com atualizacao do pacote tm nao eh mais necessario) 
@@ -268,13 +151,13 @@ wordcloud_sentiment = function(x,                          # Uma coluna de texto
     v = sort(temp[,2],decreasing = T)                                 # Retorna um objeto com as frequencias em ordem decrescente e linhas nomeadas
     d <- data.frame(words = names(v),freq=v) 
     
-# Caso contrario, se ngrams for igual a 1 (sem sequencias)      
+    # Caso contrario, se ngrams for igual a 1 (sem sequencias)      
   }else{
     
     myDTM = TermDocumentMatrix(myCorpus,                              # Obtendo matriz de termos:
                                control = list(minWordLength = 1))     # Com no minimo 1 ocorrencia
     
-#Se se ngrams for igual a 1 (sem sequencias) e tf.idf for verdadeiro:
+    #Se se ngrams for igual a 1 (sem sequencias) e tf.idf for verdadeiro:
     if(tf_idf==T){
       myDTM=weightTfIdf(myDTM,normalize=T)                            # Realiza transformacao tf-idf
     }
@@ -401,3 +284,73 @@ wordcloud_sentiment = function(x,                          # Uma coluna de texto
 # 
 # #Com url:
 # wordcloud_sentiment(x="https://support.rstudio.com/hc/en-us/articles/200714013-Slide-Transitions-and-Navigation",type="url")
+
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#+                               Download e analise de webpage                                  +
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+html_to_text<-function(url){
+  library(RCurl)
+  library(XML)
+  # download html
+  html.doc <- getURL(url)  
+  #convert to plain text
+  doc = htmlParse(html.doc, asText=TRUE)
+  # "//text()" returns all text outside of HTML tags.
+  # We also don’t want text such as style and script codes
+  text <- xpathSApply(doc, "//text()[not(ancestor::script)][not(ancestor::style)][not(ancestor::noscript)][not(ancestor::form)]", xmlValue)
+  # Format text vector into one character string
+  return(paste(text, collapse = " "))
+}
+#Fonte: http://www.sthda.com/english/wiki/print.php?id=159
+#-----------------------------------------------------------------------------------------------
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#+                         Captação de erros de codificacao:                                    +
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+catch.error = function(x){
+  y = NA                                                     # Cria um vetor com valor faltante para teste
+  catch_error = tryCatch(tolower(x), error=function(e) e)    # Tente pegar esse erro (NA) que acabamos de criar
+  if (!inherits(catch_error, "error"))                       # Se não for um erro
+    y = tolower(x)                                           # verificar resultado se houver erro, caso contrário, a função funciona normalmente
+  return(y)
+}
+#Fonte: https://sites.google.com/site/miningtwitter/questions/talking-about/given-topic
+#-----------------------------------------------------------------------------------------------
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#+                            Limpeza de caracteres especiais                                   +
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+cleanTweets<- function(tweet){
+  
+  # Limpe o tweet para análise de sentimentos
+  
+  tweet = gsub("(f|ht)(tp)(s?)(://)(.*)[.|/](.*)", " ", tweet)  # Remove html links
+  tweet = gsub("(RT|via)((?:\\b\\W*@\\w+)+)", " ", tweet)       # Remove retweet 
+  tweet = gsub("#\\w+", " ", tweet)                             # Remove todos "#Hashtag"
+  tweet = gsub("@\\w+", " ", tweet)                             # Remove todos "@people"
+  tweet = gsub("[[:punct:]]", " ", tweet)                       # Remove todas as pontuacoes
+  tweet = gsub("[[:digit:]]", " ", tweet)                       # Remover numeros, precisamos apenas de texto para análise
+  
+  tweet = gsub("[ \t]{2,}", " ", tweet)                         # Remove espaços desnecessarios
+  tweet = gsub("^\\s+|\\s+$", "", tweet)                        # (espacos em branco, tabs etc)
+  
+  tweet = gsub('https://','',tweet)                             # Remove https://
+  tweet = gsub('http://','',tweet)                              # Remove http://
+  tweet = gsub('[^[:graph:]]', ' ',tweet)                       # Remove strings gráficos como emoticons
+  tweet = gsub('[[:punct:]]', '', tweet)                        # Remove pontuacao 
+  tweet = gsub('[[:cntrl:]]', '', tweet)                        # Remove strings de controle
+  tweet = gsub('\\d+', '', tweet)                               # Remove numeros
+  tweet=str_replace_all(tweet,"[^[:graph:]]", " ")              # Remove strings gráficos como emoticons
+  #tweet=SnowballC::wordStem(tweet,language = lang)     # Aplica steamming (desativado) 
+  
+  #Converte tudo para minusculo 
+  tweet = catch.error(tweet)                                    # Aplica a funcao catch.error 
+  
+  return(tweet)
+}
+#Referencia: https://sites.google.com/site/miningtwitter/questions/talking-about/wordclouds/comparison-cloud
+#-----------------------------------------------------------------------------------------------
