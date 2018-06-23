@@ -7,7 +7,7 @@ plot_pred_type_distribution <- function(df, threshold) {
   
   df$fit_type <- v
   
-  ggplot(data=df, aes(x=rev(class), y=fit)) + 
+  ggplot(data=df, aes(x=class, y=fit)) + 
     geom_violin(fill=rgb(1,1,1,alpha=0.6), color=NA) + 
     geom_jitter(aes(color=fit_type), alpha=0.6) +
     geom_hline(yintercept=threshold, color="red", alpha=0.6) +
