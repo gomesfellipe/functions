@@ -2,6 +2,7 @@
 #+                            Limpeza de caracteres especiais                                   +
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 clean_tweets<- function(tweet){
+  
 library(stringr)
   
   # Limpe o tweet para análise de sentimentos
