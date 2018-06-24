@@ -35,24 +35,3 @@ library(stringr)
 #Referencia: https://sites.google.com/site/miningtwitter/questions/talking-about/wordclouds/comparison-cloud
 #-----------------------------------------------------------------------------------------------
 
-catch_error = function(x){
-  y = NA                                                     # Cria um vetor com valor faltante para teste
-  catch_error = tryCatch(tolower(x), error=function(e) e)    # Tente pegar esse erro (NA) que acabamos de criar
-  if (!inherits(catch_error, "error"))                       # Se não for um erro
-    y = tolower(x)                                           # verificar resultado se houver erro, caso contrário, a função funciona normalmente
-  return(y)
-}
-#Fonte: https://sites.google.com/site/miningtwitter/questions/talking-about/given-topic
-
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#+                         Captação de erros de codificacao:                                    +
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-catch_error = function(x){
-  y = NA                                                     # Cria um vetor com valor faltante para teste
-  catch_error = tryCatch(tolower(x), error=function(e) e)    # Tente pegar esse erro (NA) que acabamos de criar
-  if (!inherits(catch_error, "error"))                       # Se não for um erro
-    y = tolower(x)                                           # verificar resultado se houver erro, caso contrário, a função funciona normalmente
-  return(y)
-}
-#Fonte: https://sites.google.com/site/miningtwitter/questions/talking-about/given-topic
-#-----------------------------------------------------------------------------------------------
