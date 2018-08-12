@@ -15,7 +15,7 @@ interaction_all <- function(df, func){
             data.table(
               variable_x = tmp[1],
               variable_y = tmp[2],
-              chi2 = chisq.test(x = vec1, vec2, correct=FALSE)$p.value,
+              # chi2 = chisq.test(x = vec1, vec2, correct=FALSE)$p.value,
               v_cramer = func(x = vec1, y = vec2)
             )
           }))
