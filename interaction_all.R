@@ -1,4 +1,4 @@
-# Aplica as interacoes de algum teste dois a dois
+# Aplica as interacoes de algum calculo dois a dois em um data.table()
 # Referencia: http://analysingstuffs.xyz/2017/12/01/visualizing-the-correlations-between-categorical-variables-with-r-a-cramers-v-heatmap/
 
 interaction_all <- function(df, func){
