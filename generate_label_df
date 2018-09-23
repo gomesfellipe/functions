@@ -1,0 +1,13 @@
+# Recebe teste de tukey e retorna letrinhas
+
+generate_label_df <- function(TUKEY, variable){
+  
+  # Extract labels and factor levels from Tukey post-hoc 
+  Tukey.levels <- TUKEY[[variable]][,4]
+  Tukey.labels <- data.frame(multcompLetters(Tukey.levels)['Letters'])
+  
+  #I need to put the labels in the same order as in the boxplot :
+  Tukey.labels$treatment=rownames(Tukey.labels)
+  Tukey.labels=Tukey.labels[order(Tukey.labels$treatment) , ]
+  return(Tukey.labels)
+}
