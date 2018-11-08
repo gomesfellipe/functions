@@ -12,7 +12,7 @@ grafico_descritivo <- function(x, colNames = NULL, color = NULL) {
   temp <-
     x %>%
     # se a variavel for de "0,1" transformar e fator
-    mutate_if( ~ (names(table(.x)) %in% 0:1)[1], as.factor) %>% 
+    mutate_if( ~ (length(table(.x))==2), as.factor) %>% 
     select(one_of(colNames))  # ordenando para aparecer no grafico
   
   # se o valor de cor nao estiver especificado
