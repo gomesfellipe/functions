@@ -1,0 +1,40 @@
+model <- 
+  rpart(y ~ . ,
+        data=train,
+        control=rpart.control(maxdepth=10,  # profundidade máxima de qualquer nó da árvore final
+                              cp=0.001,        # any positive improvement will do
+                              minsplit=20, # o número mínimo de observações que devem existir em um nó para que uma divisão seja tentada.
+                              minbucket=50, # even leaves with 1 point are accepted
+                              xval=1))     # I don't need crossvalidation
+
+# Fonte: http://www.milbo.org/doc/prp.pdf secao 6.1
+split.fun <- function(x, labs, digits, varlen, faclen)
+{
+  labs <- gsub(",", " ", labs)
+  for(i in 1:length(labs)) {
+    # split labs[i] into multiple lines
+    labs[i] <- paste(strwrap(labs[i], width=25), collapse="\n")
+  }
+  gsub(" = ", ":\n", labs)
+}
+
+
+# A convenção é usar a melhor árvore (menor erro relativo de validação cruzada) ou a menor árvore (mais simples) dentro de um erro padrão da melhor árvore.
+rpart.plot(model, 
+           type = 3, 
+           extra = 101, # n e %  de cada no
+           under = TRUE, # informacao abaixo da caixa
+           branch.lty = 2,
+           # branch.type = 5,
+           split.fun = split.fun,
+           fallen.leaves = T,
+           under.cex = 1, # tamanho do texto abaixo da caixa
+           branch=.9,
+           prefix = "Valor total do\n melhor lance:\n", # prefixo de cada caixa
+           main = "Modelo de Árvore de Decisões", # main title
+           cex.main = 0.9, # use big text for main title
+           # cex = 0.7,
+           )
+
+# Medias obtidas nos agrupamentos
+rpart.rules(model, cover = TRUE)
