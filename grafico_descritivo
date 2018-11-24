@@ -3,6 +3,7 @@
 # esta funcao sera modificada!
 
 grafico_descritivo <- function(x, colNames = NULL, color = NULL,colors=NULL) {
+  
   # Conferir se usuario altetrou a
   # ordem das colunas e linhas do do output:
   if (is.null(colNames)) {
@@ -21,26 +22,28 @@ grafico_descritivo <- function(x, colNames = NULL, color = NULL,colors=NULL) {
       ggpairs(temp, aes(alpha = 0.3),
               lower = list(combo = wrap(
                 "facethist", bins = 30, position = "dodge")))
-  # se o valor estiver especificado
+    # se o valor estiver especificado
   } else{
     g <- # grafico de dispersao customizado
       ggpairs(temp, aes(color = factor(!!as.name(color)), alpha = 0.3),  
               lower = list(combo = wrap(
                 "facethist", bins = 30, position = "dodge")))
   }
- 
-if(!is.null(colors)){ 
- for(i in 1:p$nrow) {
-  #https://stackoverflow.com/questions/34740210/how-to-change-the-color-palette-for-ggallyggpairs
-  for(j in 1:p$ncol){
-    p[i,j] <- p[i,j] + 
-        scale_fill_manual(values=colors) +
-        scale_color_manual(values=colors)  
+  
+  if(!is.null(colors)){ 
+    p <- g + theme_bw()
+    
+    for(i in 1:p$nrow) {
+      #https://stackoverflow.com/questions/34740210/how-to-change-the-color-palette-for-ggallyggpairs
+      for(j in 1:p$ncol){
+        p[i,j] <- p[i,j] + 
+          scale_fill_manual(values=colors) +
+          scale_color_manual(values=colors)  
+      }
+    }
+    p
+  }else{
+    g + theme_bw()  # + tema de fundo branco
   }
-}
-p
-}else{
-g + theme_bw()  # + tema de fundo branco
-}
-
+  
 }
