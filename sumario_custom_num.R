@@ -1,6 +1,6 @@
 sumario_custom_num <- 
   function(x,na_rm=T){
-  pubg_tpp1 %>% map2_df(colnames(pubg_tpp1),
+  x %>% map2_df(colnames(x),
                       ~ bind_cols(variavel = .y,
                                  min = min(.x, na.rm = na_rm),
                                  q25 = quantile(.x,probs = c(0,1,0.25),na.rm = na_rm)[1] ,
