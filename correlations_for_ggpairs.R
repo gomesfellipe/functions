@@ -5,3 +5,5 @@ my_fn <- function(data, mapping, method="lm", ...){
     geom_smooth(method=method, ...)
   p
 }
+# use:
+# GGally::ggpairs(mtcars, lower = list(continuous = my_fn))
