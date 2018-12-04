@@ -1,7 +1,12 @@
 # Teste KMO (Kaiser-Meyer-Olkin) - avalia a adequação do tamanho amostra. 
 #Varia entre 0 e 1, onde: zero indica inadequado para análise fatorial, aceitável se for maior que 0.5, recomendado acima de 0.8.
 
-kmo <- function(x)
+# MSA: Measure of Sampling Adequacy - 
+# Similar ao KMO essa medida verifica se existe uma estrutura fatorial nos dados. 
+# Calculada separadamente para cada variável, pois o objetivo é verificar se
+# uma dada variável pode ser explicada pelas as demais. 
+#Valores baixos indicam que a variável analisada por ser retirada da análise sem maiores prejuízos.
+kmo_msa <- function(x)
 {
   x <- subset(x, complete.cases(x)) # Omitindo valores faltantes
   r <- cor(x) # Matrix de correlacao
