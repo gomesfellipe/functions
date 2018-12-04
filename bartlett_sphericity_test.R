@@ -2,7 +2,7 @@
 #isto é, avalia se os componentes fora da diagonal principal são zero. 
 #O resultado significativo indica que existem algumas relações entre as variáveis.
 
-bartlett_sphericity.test <- function(x)
+bartlett_sphericity_test <- function(x)
 {
   method <- "Teste de esfericidade de Bartlett"
   data.name <- deparse(substitute(x))
