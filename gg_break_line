@@ -1,0 +1,7 @@
+# Altera o formato do label no ggplot com quebra de linha por palavra:
+
+gg_break_line <- function(x,...){
+    gsub('\\s','\n',x)
+}
+
+# fonte: https://stackoverflow.com/questions/20123147/add-line-break-to-axis-labels-and-ticks-in-ggplot
