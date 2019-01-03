@@ -1,0 +1,61 @@
+# Funcao para escrever numero por extenso em portugues
+#
+# Em fase de desenvolvimento, ainda serão necessárias
+# algumas melhorias para juntar as palavras
+
+# Referencia para iniciar a funcao (em ingles):
+# https://github.com/ateucher/useful_code/blob/master/R/numbers2words.r
+
+numbers2words <-
+  function(x){
+    ## Function by John Fox found here: 
+    ## http://tolstoy.newcastle.edu.au/R/help/05/04/2715.html
+    
+    helper <- function(x){
+      
+      digits <- rev(strsplit(as.character(x), "")[[1]])
+      nDigits <- length(digits)
+      if (nDigits == 1) as.vector(ones[digits])
+      else if (nDigits == 2)
+        if (x <= 19) as.vector(teens[digits[1]])
+      else trim(paste(tens[digits[2]],
+                      Recall(as.numeric(digits[1]))))
+      else if (nDigits == 3) trim(paste(centenas[digits[3]],tens[digits[2]],
+                                        Recall(as.numeric(digits[1]))))
+      else {
+        nSuffix <- ((nDigits + 2) %/% 3) - 1
+        if (nSuffix > length(suffixes)) stop(paste(x, "is too large!"))
+        trim(paste(Recall(makeNumber(digits[
+          nDigits:(3*nSuffix + 1)])),
+          suffixes[nSuffix],  
+          Recall(makeNumber(digits[(3*nSuffix):1]))))
+      }
+    }
+    trim <- function(text){
+      gsub("^\ ", "", gsub("\ *$", "", text))
+    }  
+    makeNumber <- function(...) as.numeric(paste(..., collapse=""))     
+    opts <- options(scipen=100) 
+    on.exit(options(opts)) 
+    ones <- c("", "um", "dois", "três", "quatro", "cinco", "seis", "sete",
+              "oito", "nove") 
+    names(ones) <- 0:9 
+    teens <- c("dez", "onze", "doze", "treze", "quatorze", "quinze",
+               "dezesseis", "dezessete", "dezoito", "dezenove")
+    names(teens) <- 0:9 
+    tens <- c("vinte", "trinta", "quarenta", "cinquenta", "sessenta", "setenta",
+              "oitenta", "noventa") 
+    names(tens) <- 2:9 
+    centenas <- c("cento", "duzentos", "trezentos", "quatrocentos", "quinhentos",
+                  "seiscentos", "setecentos", "oitocentos", "novecentos")
+    names(centenas) <- 1:9
+    x <- round(x)
+    suffixes <- c("mil", "milhões", "bilhões", "trilhões")     
+    if (length(x) > 1) return(sapply(x, helper))     
+    helper(x) 
+  }
+
+# Exemplos:
+numbers2words(2)
+numbers2words(20)
+numbers2words(201)
