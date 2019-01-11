@@ -1,10 +1,35 @@
-packages = c('<package1>', '<package2>')
+# Funcao para carregar ou instalar os pacotes desejados:
 
-for (package in packages) {
-    if (!require(package, character.only=T, quietly=T)) {
-        install.packages(package)
-        library(package, character.only=T)
-    }
-}
+# Descricao:
+# 1 - Encontrar pacotes ja instalados:
+# 2 - verifica se ja esta instalado ou nao:
+# 3 - se ja estiver instalado, nao sera instalado novamente
+# 4 - se o pacote estiver faltando, instala o pacote
+# 5 - carrega os pacotes:
 
-# Ref: https://stackoverflow.com/questions/5595512/what-is-the-difference-between-require-and-library?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+# Inspirado em: https://www.listendata.com/2018/12/install-load-multiple-r-packages.html
+
+install_and_load_packages <- 
+  function(packages) {
+    
+    k <- packages[!(packages %in% installed.packages()[,"Package"])]
+    if(length(k)){ install.packages(k, repos='https://cran.rstudio.com/') }
+    
+    suppressMessages(purrr::walk(packages,require, quietly = TRUE,
+                                 character.only = TRUE, warn.conflicts = FALSE))
+  }
+
+# Exemplo de uso:
+# install_and_load_packages(c("rmarkdown", "shiny"))
+
+# Abordagem antiga:
+# packages = c('<package1>', '<package2>')
+# 
+# for (package in packages) {
+#   if (!require(package, character.only=T, quietly=T)) {
+#     install.packages(package)
+#     library(package, character.only=T)
+#   }
+# }
+# 
+# # Ref: https://stackoverflow.com/questions/5595512/what-is-the-difference-between-require-and-library?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
