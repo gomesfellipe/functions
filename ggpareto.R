@@ -1,4 +1,5 @@
 # Cria um grafico de pareto a partir de um vetor de strings
+# Proximos passos: parametrizar e receber df como input
 
 # Inspirado em:
 # https://rpubs.com/dav1d00/ggpareto
