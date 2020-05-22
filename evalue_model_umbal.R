@@ -1,5 +1,3 @@
-
-
 # Evalue function -----------------------------------------------------------------------------
 
 evalue_model_umbal <- function(TP, TN, FP, FN){
