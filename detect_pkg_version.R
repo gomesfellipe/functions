@@ -1,6 +1,6 @@
 # Detectar a versão a e origem de um ou mais pacotes
 
-detect_pkg_version <- detect_function(package){
+detect_pkg_version <- function(package){
   
   if(length(package) == 1){
     desc <- packageDescription(package)  
@@ -15,17 +15,15 @@ detect_pkg_version <- detect_function(package){
     desc <- lapply(package, packageDescription)
     
     desc <- 
-    unlist(
-      lapply(desc, function(desc){
-        if(is.null(desc$RemoteType)){
-          glue::glue("{desc$Package} {desc$Version}")  
-        }else if(desc$RemoteType == "github"){
-          glue::glue("{desc$Package} {desc$Version} ({desc$GithubUsername}/{desc$GithubRepo})")
-        }  
-      })  
-    )
+      unlist(
+        lapply(desc, function(desc){
+          if(is.null(desc$RemoteType)){
+            glue::glue("{desc$Package} {desc$Version}")  
+          }else if(desc$RemoteType == "github"){
+            glue::glue("{desc$Package} {desc$Version} ({desc$GithubUsername}/{desc$GithubRepo})")
+          }  
+        })  
+      )
     tibble::tibble(package = desc)
   }
-  
-  
 }
