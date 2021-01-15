@@ -1,4 +1,3 @@
-
 # Como utilizar a funcao wordcloud_sentiment():
 
 #----------------.--------------------------------------------------------------------------------.-------------------------------------
@@ -78,13 +77,13 @@ wordcloud_sentiment = function(x,                          # Uma coluna de texto
   #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   #+                  Importando fontes nativas do windows para as letras                         +
   #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-      #windowsFonts(
-      #  A=windowsFont("Arial Black"),
-      #  B=windowsFont("Bookman Old Style"),
-      #  C=windowsFont("Comic Sans MS"),
-      #  D=windowsFont("Symbol")
-      #)
+  
+  #windowsFonts(
+  #  A=windowsFont("Arial Black"),
+  #  B=windowsFont("Bookman Old Style"),
+  #  C=windowsFont("Comic Sans MS"),
+  #  D=windowsFont("Symbol")
+  #)
   #-----------------------------------------------------------------------------------------------
   
   
@@ -227,9 +226,10 @@ wordcloud_sentiment = function(x,                          # Uma coluna de texto
                 colors=sentimentos$col,                               # Input informado pelo usuario
                 random.order=FALSE,                                   # Plot das palavras em ordem aleatória. Se falso, eles serão plotados em frequência decrescente
                 rot.per=(1-horizontal),                               # Proporção de palavras com rotação de 90 graus
-                use.r.layout=FALSE,                                   # Se falso, o código c ++ é usado para detecção de colisão, caso contrário, R é usado
+                use.r.layout=FALSE                                   # Se falso, o código c ++ é usado para detecção de colisão, caso contrário, R é usado
                 #family = "C",                                         # Seleciona a fonte informada em windowsFonts no inicio do documento
-                font = 2)                                             # 1:default, 2:negrito, 3:italico, 4:negrito+italico
+                #font = 2
+                )                                             # 1:default, 2:negrito, 3:italico, 4:negrito+italico
       
       return(freq = d)                                                # Retorna os termos detectados ordenados de acordo com a sua frequencia
       
@@ -246,9 +246,10 @@ wordcloud_sentiment = function(x,                          # Uma coluna de texto
                   rev(),                                              # Altera a ordem que as cores participarao da figura
                 random.order=FALSE,                                   # Plot das palavras em ordem aleatória. Se falso, eles serão plotados em frequência decrescente
                 rot.per=(1-horizontal),                               # Proporção de palavras com rotação de 90 graus
-                use.r.layout=FALSE,                                   # Se falso, o código c ++ é usado para detecção de colisão, caso contrário, R é usado
+                use.r.layout=FALSE                                   # Se falso, o código c ++ é usado para detecção de colisão, caso contrário, R é usado
                 #family = "C",                                         # Seleciona a fonte informada em windowsFonts no inicio do documento 
-                font = 2)                                             # 1:default, 2:negrito, 3:italico, 4:negrito+italico
+                #font = 2
+                )                                             # 1:default, 2:negrito, 3:italico, 4:negrito+italico
       
       return(freq = d)                                                # Retorna os termos detectados ordenados de acordo com a sua frequencia
       
@@ -354,4 +355,4 @@ cleanTweets<- function(tweet){
   return(tweet)
 }
 #Referencia: https://sites.google.com/site/miningtwitter/questions/talking-about/wordclouds/comparison-cloud
-#-----------------------------------------------------------------------------------------------
+
