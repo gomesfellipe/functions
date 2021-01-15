@@ -51,7 +51,6 @@ wordcloud_sentiment = function(x,                          # Uma coluna de texto
                                ngrams=1,                   # Ordem da sequencia de palavras
                                sentiment=F,                # Se a analise de sentimentos sera realizada
                                horizontal=0.35,            # Porcentagem de palavras na horizontal (De zero a um)
-                               windows = FALSE,
                                textStemming=F){            # Define se os sufixos serao removidos
   
   #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -79,14 +78,13 @@ wordcloud_sentiment = function(x,                          # Uma coluna de texto
   #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   #+                  Importando fontes nativas do windows para as letras                         +
   #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  if(windows == TRUE){
-      windowsFonts(
-        A=windowsFont("Arial Black"),
-        B=windowsFont("Bookman Old Style"),
-        C=windowsFont("Comic Sans MS"),
-        D=windowsFont("Symbol")
-      )
-  }
+
+      #windowsFonts(
+      #  A=windowsFont("Arial Black"),
+      #  B=windowsFont("Bookman Old Style"),
+      #  C=windowsFont("Comic Sans MS"),
+      #  D=windowsFont("Symbol")
+      #)
   #-----------------------------------------------------------------------------------------------
   
   
